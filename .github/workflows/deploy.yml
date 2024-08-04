@@ -21,7 +21,9 @@ jobs:
         java-version: '17'
 
     - name: Build with Gradle
-      run: ./gradlew build
+      run: |  # Shell 에서 여러 개의 명령어를 실행할 때 사용하는 것
+        chmod +x ./gradlew
+        ./gradlew build
 
     - name: Set SSH key permissions
       run: |
@@ -35,16 +37,15 @@ jobs:
         ssh-private-key: ${{ secrets.SERVER_SSH_KEY }}
 
     - name: Add known_hosts
-      run: |
-        echo "3.35.176.244 ssh-ed25519 |1|jnGOQd5RwJa+Kzxzh7X9aQXt9mA=|DCXFVR/DoaLtrBDRQslijFzTrWs= ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILFojqOyuFwv6wcrm2b/wsSEVRknYhTbGpZGmRvUtXU7=" >> ~/.ssh/known_hosts
-
+      run: |      # 이 명령을 아래처럼 변경 => echo "3.35.176.244 ssh-ed25519 |1|jnGOQd5RwJa+Kzxzh7X9aQXt9mA=|DCXFVR/DoaLtrBDRQslijFzTrWs= ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILFojqOyuFwv6wcrm2b/wsSEVRknYhTbGpZGmRvUtXU7=" >> ~/.ssh/known_hosts
+        ssh-keyscan -t ed25519 3.35.176.244 >> ~/.ssh/known_hosts
+        
     - name: 기존프로세스 종료 
       run: |
         kill -9 $(ps -ef | grep devops | grep -v grep | head -n 1 | awk '{print $2}') || true
 
     - name: Deploy to Server
       run: scp -i ~/.ssh/id_rsa -r build/libs/*.jar ubuntu@3.35.176.244:~/
-
 
     - name: Run SSH commands
       run: |
