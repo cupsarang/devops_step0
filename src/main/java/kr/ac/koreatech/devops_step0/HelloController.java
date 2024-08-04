@@ -12,4 +12,8 @@ public class HelloController {
         return "index.html";
     }
     
+    @GetMapping("/shark")
+    public String shark() {
+        return "shark.html";
+    }
 }
